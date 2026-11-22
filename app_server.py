@@ -220,9 +220,10 @@ class Handler(SimpleHTTPRequestHandler):
     server_version = "LPBiblothek/1.0"
 
     def log_message(self, fmt: str, *args) -> None:  # ruhiger Server, keine Tokengefahr
-        if "/api/" in (args[0] if args else ""):
+        text = fmt % args if args else str(fmt)
+        if "/api/" in text:
             return
-        sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
+        sys.stderr.write("%s - %s\n" % (self.address_string(), text))
 
     # ---------- Helfer
     def _json(self, payload: dict, status: int = 200) -> None:
