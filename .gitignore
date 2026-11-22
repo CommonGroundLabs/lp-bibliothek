@@ -1,0 +1,20 @@
+# Zugangsdaten
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Sync-Zwischendateien
+web/collection.json.tmp
+web/collection.json
+web/previews.json
+web/covers/
+*.log
+
+# Betriebssystem
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>LP · Bibliothek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=25">
+</head>
+<body>
+
+<div class="ambient" id="ambient" aria-hidden="true">
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+  <div class="glow glow-c"></div>
+  <div class="vignette"></div>
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">LP</span>
+    <span class="brand-name">Bibliothek</span>
+    <span class="brand-count" id="countLabel">–</span>
+  </div>
+
+  <div class="tools">
+    <label class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+      <input id="search" type="search" placeholder="Artist, Titel, Track …" aria-label="Sammlung durchsuchen" autocomplete="off" spellcheck="false">
+    </label>
+    <button class="btn" id="filterBtn" aria-expanded="false" aria-controls="filterPanel" aria-label="Filter"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span class="btn-label">Filter</span><span class="badge" id="filterBadge" hidden>0</span></button>
+    <button class="btn" id="sortBtn" aria-expanded="false" aria-controls="sortPanel">Jahr <span id="sortDir">↓</span></button>
+    <div class="viewswitch" role="group" aria-label="Ansicht wechseln">
+      <button type="button" data-mode="flow" title="Cover-Flow" aria-label="Cover-Flow" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="4" height="10" rx="1.2"/><rect x="10" y="3" width="4" height="18" rx="1.2"/><rect x="17" y="7" width="4" height="10" rx="1.2"/></svg></button>
+      <button type="button" data-mode="grid" title="Raster" aria-label="Rasteransicht" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.6"/><rect x="13" y="3" width="8" height="8" rx="1.6"/><rect x="3" y="13" width="8" height="8" rx="1.6"/><rect x="13" y="13" width="8" height="8" rx="1.6"/></svg></button>
+      <button type="button" data-mode="glass" title="Glas" aria-label="Glas-Ansicht" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.4"/><path d="M7.4 9.2c1.6-1.6 4.6-2.4 7.2-1.8"/></svg></button>
+    </div>
+    <button class="btn" id="statsBtn" aria-label="Statistik"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="btn-label">Statistik</span></button>
+    <button class="btn btn-set" id="setBtn" aria-expanded="false" aria-controls="setPanel" aria-label="Setlisten"><span class="ico">★</span><span class="btn-label">Setliste</span><span class="badge" id="setBadge">0</span></button>
+  </div>
+</header>
+
+<main class="stage" id="stage">
+  <button class="arrow arrow-prev" id="prevBtn" aria-label="Vorheriges Album">‹</button>
+  <div class="flow" id="flow" role="listbox" aria-label="Alben der Sammlung"></div>
+  <button class="arrow arrow-next" id="nextBtn" aria-label="Nächstes Album">›</button>
+
+  <div class="np" id="np" aria-live="polite">
+    <div class="np-eyebrow" id="npArtist">Sammlung</div>
+    <h1 class="np-title" id="npTitle">Lade …</h1>
+    <div class="np-meta" id="npMeta"></div>
+    <div class="np-actions">
+      <button class="chipbtn" id="playBtn" hidden aria-pressed="false" title="30-Sekunden-Vorschau (P)"><span class="pv-ico" aria-hidden="true"></span> 30 s</button>
+      <button class="chipbtn" id="detailBtn">Details</button>
+      <button class="chipbtn star" id="starBtn" aria-pressed="false"><span id="starIcon">☆</span> <span id="starLabel">Setliste</span></button>
+      <button class="chipbtn" id="randomBtn" title="Zufallsalbum (R)">⤨ Zufall</button>
+      <button class="chipbtn" id="demoConnect" hidden title="Eigene Discogs-Sammlung verbinden">⇄ Discogs verbinden</button>
+    </div>
+  </div>
+
+  <div class="scrub">
+    <span class="scrub-pos" id="scrubPos">–</span>
+    <input type="range" id="slider" min="0" max="0" value="0" step="1" aria-label="Position in der Sammlung">
+  </div>
+</main>
+
+<section class="grid" id="grid" hidden aria-label="Rasteransicht"></section>
+
+<section class="glass" id="glass" hidden aria-label="Glas-Ansicht">
+  <div class="glass-grid" id="glassGrid"></div>
+</section>
+
+<div class="glass-dock" id="glassDock" hidden>
+  <div class="dock-cover"><img id="dockCover" alt=""></div>
+  <div class="dock-info">
+    <span id="dockArtist"></span>
+    <span id="dockTitle"></span>
+  </div>
+  <div class="dock-meta" id="dockMeta"></div>
+  <div class="dock-actions">
+    <button id="dockPrev" aria-label="Vorheriges Album">‹</button>
+    <button id="dockPlay" aria-label="30-Sekunden-Vorschau" aria-pressed="false" hidden><span class="pv-ico" aria-hidden="true"></span></button>
+    <button id="dockNext" aria-label="Nächstes Album">›</button>
+  </div>
+</div>
+
+<!-- Filterpanel -->
+<div class="panel" id="filterPanel" hidden>
+  <div class="panel-head">
+    <h2>Filtern</h2>
+    <button class="link" id="filterReset">Zurücksetzen</button>
+  </div>
+  <div class="panel-body" id="filterBody"></div>
+</div>
+
+<!-- Sortierpanel -->
+<div class="panel panel-sort" id="sortPanel" hidden>
+  <div class="panel-head"><h2>Sortieren</h2></div>
+  <div class="panel-body" id="sortBody"></div>
+</div>
+
+<!-- Setlisten-Panel -->
+<aside class="setpanel" id="setPanel" hidden aria-label="Setlisten">
+  <div class="setpanel-head">
+    <h2>Setlisten</h2>
+    <button class="iconbtn" id="setClose" aria-label="Setlisten schließen">×</button>
+  </div>
+  <div class="setpanel-controls">
+    <select id="setSelect" aria-label="Setliste wählen"></select>
+    <button class="iconbtn" id="setNew" title="Neue Setliste" aria-label="Neue Setliste">+</button>
+    <button class="iconbtn" id="setRename" title="Umbenennen" aria-label="Setliste umbenennen">✎</button>
+    <button class="iconbtn" id="setDelete" title="Löschen" aria-label="Setliste löschen">🗑</button>
+  </div>
+  <div class="setstats" id="setStats">0 Alben</div>
+  <div class="setmeta">
+    <svg class="energy" id="setEnergy" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <label class="set-target">Ziel <input id="setTarget" type="number" min="0" max="600" step="5" value="60" inputmode="numeric" aria-label="Zieldauer in Minuten"> min</label>
+  </div>
+  <ol class="setitems" id="setItems"></ol>
+  <div class="setactions">
+    <button class="btn small" id="gigBtn">Gig-Modus</button>
+    <button class="btn small" id="exportText">Text</button>
+    <button class="btn small" id="exportCsv">CSV</button>
+    <button class="btn small" id="exportJson">JSON</button>
+    <button class="btn small" id="importJson">Import</button>
+    <button class="btn small" id="printSet">Druck</button>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+  </div>
+</aside>
+
+<!-- Einrichtung / Willkommen -->
+<div class="overlay welcome" id="welcome" hidden>
+  <div class="wcard" role="dialog" aria-modal="true" aria-labelledby="wTitle">
+    <div class="wbrand"><span class="brand-mark">LP</span> Bibliothek</div>
+    <h1 id="wTitle">Deine Platten, dein Katalog.</h1>
+    <p class="wlead">Verbinde deinen Discogs-Account. Die Sammlung wird einmalig lokal gespeichert –
+      danach läuft die Bibliothek offline, ohne Backend, ohne Konto bei mir.</p>
+
+    <ol class="wsteps">
+      <li><span>1</span> Benutzername</li>
+      <li><span>2</span> Token einfügen</li>
+      <li><span>3</span> Sammlung laden</li>
+    </ol>
+
+    <form class="wform" id="wForm" autocomplete="off">
+      <label class="wlabel">
+        <span>Discogs-Benutzername</span>
+        <input id="wUser" name="username" type="text" placeholder="dein Discogs-Name" spellcheck="false" required>
+      </label>
+      <label class="wlabel">
+        <span>Personal Access Token
+          <a href="https://www.discogs.com/settings/developers" target="_blank" rel="noopener noreferrer">erzeugen ↗</a></span>
+        <input id="wToken" name="token" type="password" placeholder="Token einfügen" spellcheck="false" required>
+      </label>
+      <p class="whint">Der Token geht ausschließlich an diesen Server auf deinem Rechner und landet in
+        <code>.env</code> (von <code>.gitignore</code> ausgeschlossen). Er taucht in keiner Antwort und
+        keinem Log auf.</p>
+      <div class="wactions">
+        <button class="wbtn primary" type="submit" id="wSubmit">Account verbinden</button>
+        <button class="wbtn" type="button" id="wDemo">Erst mal Demo ansehen</button>
+      </div>
+    </form>
+
+    <div class="wresult" id="wResult" hidden>
+      <p class="wwho"><strong id="wWho"></strong><span id="wReleases"></span></p>
+      <div class="wactions">
+        <button class="wbtn primary" id="wSync">Sammlung laden</button>
+        <button class="wbtn" id="wChange">Anderer Account</button>
+      </div>
+    </div>
+
+    <div class="wstatic" id="wStatic" hidden>
+      <p class="whint">Diese Seite läuft ohne lokalen Server, deshalb kann hier kein Account verbunden
+        werden. Starte die Einrichtung auf deinem Rechner:</p>
+      <pre class="wcode">python3 setup.py</pre>
+      <p class="whint">Danach im Browser <code>http://127.0.0.1:8765</code> öffnen. Fürs Hosten der Seite
+        nach dem Sync genügt der Ordner <code>web/</code>.</p>
+    </div>
+
+    <div class="wprogress" id="wProgress" hidden>
+      <div class="wline"><span id="wStage">Sammlung wird geladen …</span><span id="wCount"></span></div>
+      <div class="wbar" id="wBar"><div class="wfill" id="wFill"></div></div>
+      <p class="whint" id="wNote">Bei großen Sammlungen dauert das 20–60 Minuten (Discogs erlaubt ~60
+        Anfragen pro Minute). Der Fortschritt läuft hier live mit.</p>
+      <pre class="wlog" id="wLog" aria-live="polite"></pre>
+      <div class="wactions">
+        <button class="wbtn primary" id="wFinish" hidden>Bibliothek öffnen</button>
+        <button class="wbtn" id="wCancel">Abbrechen</button>
+      </div>
+    </div>
+
+    <p class="werror" id="wError" hidden></p>
+    <p class="wfoot">Deine Sammlung, deine Setlisten, deine BPM-Notizen bleiben auf diesem Rechner.</p>
+  </div>
+</div>
+
+<!-- Vorschau-Leiste -->
+<div class="pvbar" id="pvBar" hidden role="status" aria-live="polite">
+  <div class="pvbar-cover"><img id="pvCover" alt=""></div>
+  <div class="pvbar-info">
+    <span class="pvbar-track" id="pvTrack"></span>
+    <span class="pvbar-meta" id="pvMeta"></span>
+  </div>
+  <span class="pvbar-time" id="pvTime">0:00</span>
+  <button class="pvbar-btn" id="pvToggle" aria-label="Pause" aria-pressed="false"><span class="pv-ico" aria-hidden="true"></span></button>
+  <button class="pvbar-btn" id="pvClose" aria-label="Vorschau beenden">×</button>
+  <div class="pvbar-fill" id="pvFill"></div>
+</div>
+
+<!-- Detailansicht -->
+<div class="overlay" id="detail" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <button class="close" id="detailClose" aria-label="Schließen">×</button>
+    <div class="sheet-cover" id="dCoverWrap">
+      <img id="dCover" alt="">
+      <div class="cover-ph" id="dPh" hidden aria-hidden="true"></div>
+    </div>
+    <div class="sheet-body">
+      <p class="eyebrow" id="dArtist"></p>
+      <h2 id="dTitle"></h2>
+      <p class="sheet-sub" id="dSub"></p>
+      <div class="sheet-actions">
+        <button class="chipbtn" id="dPlay" hidden aria-pressed="false" title="30 s reinhören"><span class="pv-ico" aria-hidden="true"></span> Reinhören</button>
+        <button class="chipbtn star" id="dStar" aria-pressed="false">☆ Setliste</button>
+        <a class="chipbtn" id="dLink" href="#" target="_blank" rel="noopener noreferrer">Discogs ↗</a>
+      </div>
+      <div class="tags-row">
+        <div class="tags-list" id="dTags"></div>
+        <input class="tag-input" id="dTagInput" list="tagOptions" placeholder="+ Tag" aria-label="Tag hinzufügen" maxlength="24" autocomplete="off">
+        <datalist id="tagOptions"></datalist>
+      </div>
+      <div class="suggest" id="dSuggest" hidden></div>
+      <dl class="facts" id="dFacts"></dl>
+      <h3 class="tracks-head">Tracklist <span id="dTrackCount"></span></h3>
+      <p class="pv-note" id="dPvNote" hidden>Für dieses Release gibt es keine 30-Sekunden-Vorschau.</p>
+      <ol class="tracks" id="dTracks"></ol>
+    </div>
+  </div>
+</div>
+
+<!-- Statistik -->
+<div class="overlay" id="stats" hidden>
+  <div class="sheet stats-sheet" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
+    <button class="close" id="statsClose" aria-label="Statistik schließen">×</button>
+    <div class="stats-head">
+      <h2 id="statsTitle">Sammlung in Zahlen</h2>
+      <p class="sheet-sub" id="statsSub"></p>
+    </div>
+    <div id="statsBody"></div>
+  </div>
+</div>
+
+<!-- Gig-Modus -->
+<div class="gig" id="gig" hidden>
+  <div class="gig-bg" id="gigBg" aria-hidden="true"></div>
+  <p class="gig-set" id="gigSet"></p>
+  <button class="gig-close" id="gigClose" aria-label="Gig-Modus beenden">×</button>
+  <div class="gig-body">
+    <div class="gig-coverwrap">
+      <img id="gigCover" alt="">
+      <div class="cover-ph" id="gigPh" hidden aria-hidden="true"></div>
+    </div>
+    <div class="gig-info">
+      <p class="gig-artist" id="gigArtist"></p>
+      <h1 class="gig-title" id="gigTitle"></h1>
+      <p class="gig-meta" id="gigMeta"></p>
+      <p class="gig-note" id="gigNote"></p>
+    </div>
+  </div>
+  <div class="gig-foot">
+    <button class="gig-nav" id="gigPrev" aria-label="Vorheriges Album">‹</button>
+    <div class="gig-status">
+      <span class="gig-pos" id="gigPos"></span>
+      <span class="gig-nextlabel" id="gigNextLabel"></span>
+    </div>
+    <button class="gig-nav" id="gigNextBtn" aria-label="Nächstes Album">›</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="printArea" aria-hidden="true"></div>
+
+<script src="app.js?v=25"></script>
+</body>
+</html>
