@@ -216,6 +216,14 @@ def start_job(name: str, cmd: list[str], log_path: Path) -> Job:
 
 # ---------------------------------------------------------------- HTTP-Handler
 
+class LocalServer(ThreadingHTTPServer):
+    """Auf Windows kein SO_REUSEADDR: sonst bindet ein zweiter Prozess still denselben
+    Port und beantwortet Anfragen abwechselnd mit dem alten Code."""
+
+    allow_reuse_address = os.name != "nt"
+    daemon_threads = True
+
+
 class Handler(SimpleHTTPRequestHandler):
     server_version = "LPBiblothek/1.0"
 
@@ -395,7 +403,7 @@ def main() -> int:
 
     handler = partial(Handler, directory=str(WEB_DIR))
     try:
-        httpd = ThreadingHTTPServer((args.host, args.port), handler)
+        httpd = LocalServer((args.host, args.port), handler)
     except OSError as exc:
         print(f"Port {args.port} ist belegt ({exc}). Anderer Port: --port 8766")
         return 3
