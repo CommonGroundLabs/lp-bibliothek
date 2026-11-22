@@ -29,7 +29,7 @@ Sync-Skript (Python) + statische Seite (Vanilla JS) – **kein Backend, kein Bui
 
 Voraussetzung: **Python 3.9+** (Windows: bei der Installation „Add python.exe to PATH“ anhaken).
 
-1. **Laden** – `git clone https://github.com/<dein-name>/lp-bibliothek.git`
+1. **Laden** – `git clone https://github.com/CommonGroundLabs/lp-bibliothek.git`
    oder „Code → Download ZIP“ und entpacken.
 2. **Starten** – im Ordner:
    - Windows: Doppelklick auf **`setup.cmd`**
